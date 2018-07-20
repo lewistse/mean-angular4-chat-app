@@ -42,6 +42,7 @@ export class RequestComponent implements OnInit, AfterViewChecked {
   requests: any;  //new request
   interval: any;
   timer: any;
+  curSid:string = "0"; 
   joinned: boolean = false;
   newUser = { nickname: '', room: '' };
   newRequest = { phone_number: '', socket_id: '', room:'', message: '', request_status:'' };
@@ -69,11 +70,13 @@ export class RequestComponent implements OnInit, AfterViewChecked {
       // this.socket.on('logRequest', (userid, socket_id) => {
     // this.socket.on('users', function(userid, socket_id){
       var date = new Date();
+      // var oldSid :string = "0";
+      // var curSid :string = "0";
       // console.log("inside users socket.on");
       console.log("print userid:" +userid);
       console.log("print socket.id:" +socket_id);
   
-   if (userid !== 'admin'){
+  if (userid !== 'admin'){
   	 	console.log("print userid before saveChat: " +userid);
    		console.log("print socket_id before saveChat: " +socket_id);
    // use status field to classify the new and old request
@@ -87,33 +90,46 @@ export class RequestComponent implements OnInit, AfterViewChecked {
    	console.log(this.newRequest.request_status);
  	// console.log(this.newRequest.updated_at);
 
-  if (this.newRequest.socket_id!=undefined){
+    if (this.newRequest.socket_id!=undefined){
     //check if this socket id exist
-    this.chatService.showRequestSocket(this.newRequest.socket_id).then((result) => {
-        if (result == 0){
-          console.log( result +" entry found" );
+      // console.log("oldSid: " +this.oldSid);
+      console.log("curSid: " +this.curSid);
+      if (this.newRequest.socket_id!=this.curSid){
+      // this.chatService.showRequestSocket(this.newRequest.socket_id).then((result) => {
+      //   if (result == 0){
+      //     console.log( result +" entry found. Updating DB..." );
+
+          this.curSid = this.newRequest.socket_id;
+          console.log("curSid: " +this.curSid);
+          console.log("socket_id: " +this.newRequest.socket_id);
+
           this.chatService.saveRequest(this.newRequest).then((result) => {
             this.socket.emit('save-message', result);
+            console.log( "Updated DB" );
           }, (err) => {
           console.log(err);
           });
-        } else{
-          console.log("duplicated entry, will not update DB");
-        }
+      //   } else{
+      //     console.log("duplicated entry, will not update DB");
+      //   }
 
-      }, (err) => {
-        console.log(err);
-      });
+      // }, (err) => {
+      //   console.log(err);
+      // });
 
+   //  setTimeout(()=> {
 	  // this.chatService.saveRequest(this.newRequest).then((result) => {
    //    this.socket.emit('save-message', result);
 	  //   }, (err) => {
 	  //     console.log(err);
 	  //   });
-  }
+   //  },2000);
   
-
-  	}	  //if 
+      }  else {  //this.newRequest.socket_id!=this.curSid
+        console.log("duplicated entry, will not update DB");
+      }
+    }  // (this.newRequest.socket_id!=undefined)
+  }	  //if (userid !== 'admin')
 
   });
 

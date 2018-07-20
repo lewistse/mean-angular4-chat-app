@@ -127,7 +127,8 @@ io.on('connection', function (socket) {
       adminSocketID.push(socket.id);
       // io.to(socket.id).emit('users',{users:userSocketIDAndUsername});  //orginal
       io.to(socket.id).emit('users', userid, socket.id); //Ben
-      console.log("emit socket.on(users)" +socket.id);
+      console.log("admin emit socket.on(users)" +socket.id);
+      console.dir("print array " +adminSocketID);
       // console.log("emit socket.on(users)" +{users:userSocketIDAndUsername});
     } else if (userid == 'operator') {
       console.log("emit socket.on(operator)" +socket.id);
@@ -150,8 +151,12 @@ io.on('connection', function (socket) {
           // orginal
           // io.to(adminSocketID[i]).emit('users',{users:userSocketIDAndUsername},socket.id);
           io.to(adminSocketID[i]).emit('users',userid,socket.id);
+          // io.to(socket.id).emit('users',userid,socket.id);
           // io.to(adminSocketID[i]).emit('logRequest',userid,socket.id);
           console.log("emit (users) with userid" +userid+" to admin with socket ID " +adminSocketID[i]);
+          // console.log("emit userSocketID " +socket.id);
+          // console.log("emit username " +userid);
+
       }
     }
     socket.userid = userid;
@@ -181,10 +186,29 @@ io.on('connection', function (socket) {
 
   socket.on('disconnect', function(){
     if (socket.userid != null){
+
+      if (socket.userid == 'admin'){
+        // adminSocketID.pop();
+
+        var index = adminSocketID.indexOf(socket.id);
+        if (index > -1) {
+          adminSocketID.splice(index, 1);
+        }
+
+        console.dir("print array " +adminSocketID);
+        console.log("remove admin socket.on(users) from array" +socket.id);
+      }
+
+
       if (socket.userid != 'admin'){
-      //   userSocketIDAndUsername.pop(socket.userid + ' (' + socket.id + ')');
-      //   userSocketID.pop(socket.id);
-      //   username.pop(socket.userid);
+        // userSocketIDAndUsername.pop(socket.userid + ' (' + socket.id + ')');
+        // userSocketID.pop(socket.id);
+        // username.pop(socket.userid);
+
+        // console.log("remove userSocketID from array " +socket.id);
+        // console.log("remove username from array " +socket.userid);
+        
+
       // for(var i in adminSocketID){
       //   io.to(adminSocketID[i]).emit('users',{users:userSocketIDAndUsername});
       // }
