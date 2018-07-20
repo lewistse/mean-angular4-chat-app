@@ -6,7 +6,7 @@ export class Configs {
   
   //    constructor(public authService: AuthserviceService) {}
     
-  angularAddr: string = 'https://airpoint.com.hk:4080';
+  angularAddr: string = 'https://airpoint.com.hk:3887';
   expressAddr: string = 'https://airpoint.com.hk';
   
   socketIoServerAddr: string = 'https://airpoint.com.hk';

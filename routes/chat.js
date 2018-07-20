@@ -121,7 +121,8 @@ io.on('connection', function (socket) {
   });
 
   socket.on('user', function(userid){
-    console.log("socket.on(users)" +userid);
+    console.log("socket.on(user)" +userid+" socketid is "+socket.id);
+      
     if(userid=='admin'){
       adminSocketID.push(socket.id);
       // io.to(socket.id).emit('users',{users:userSocketIDAndUsername});  //orginal
@@ -150,7 +151,7 @@ io.on('connection', function (socket) {
           // io.to(adminSocketID[i]).emit('users',{users:userSocketIDAndUsername},socket.id);
           io.to(adminSocketID[i]).emit('users',userid,socket.id);
           // io.to(adminSocketID[i]).emit('logRequest',userid,socket.id);
-          // console.log("emit customer socket.on(users)" +socket.id);
+          console.log("emit (users) with userid" +userid+" to admin with socket ID " +adminSocketID[i]);
       }
     }
     socket.userid = userid;
@@ -206,6 +207,14 @@ io.on('connection', function (socket) {
           // io.to(adminSocketID[i]).emit('users',{users:userSocketIDAndUsername}); //no need it new UI
         }
       }
+        else   //Lu test
+            {
+                index = adminSocketID.indexOf(socket.id);
+//                if (index > -1) {
+//                    adminSocketID.splice(index, 1);
+//                }
+                
+            }
 
       if (socket.userid == 'operatorSessionUser'){
         operatorSessionUserConnected = false;
@@ -361,26 +370,12 @@ router.get('/request/:id', function(req, res, next) {
 });
 
 /* GET SINGLE REQUEST BY socket ID */
-// router.get('/requestsid/:socket_id', function(req, res, next) {
-//   Chat.find({socket_id:req.params.socket_id}, function (err, chats) {
-//     if (err) return next(err);
-//     res.json(chats);
-//   });
-// });
-
-router.get('/requestsid/:socket_id', function(req, res, next) { 
-  Chat.count({ $and: 
-    [ 
-      { socket_id: req.params.socket_id },      
-      // { request_status: { $exists: true } } 
-      { request_status: "New" } 
-    ]
-  }, function (err, chats) {
+router.get('/requestsid/:socket_id', function(req, res, next) {
+  Chat.find({socket_id:req.params.socket_id}, function (err, chats) {
     if (err) return next(err);
     res.json(chats);
   });
 });
-
 
 /* SAVE REQUEST */
 router.post('/request', function(req, res, next) {
