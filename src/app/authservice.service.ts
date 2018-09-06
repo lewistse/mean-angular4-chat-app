@@ -37,7 +37,8 @@ import { HttpClient } from '@angular/common/http';
 import { BrowserModule }    from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import 'rxjs/add/observable/throw';
-import { Configs } from './configurations';
+//import { Configs } from './configurations';
+import { Configs } from './../environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({

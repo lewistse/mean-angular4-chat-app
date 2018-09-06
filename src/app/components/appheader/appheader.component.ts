@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy} from '@angular/core';
 import { AuthService, UserDetails } from '../../auth/auth.service';
-import { Configs } from '../../configurations';
+//import { Configs } from '../../configurations';
+import { Configs } from '../../../environments/environment';
 import { ChatService } from '../../chat.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as io from 'socket.io-client';

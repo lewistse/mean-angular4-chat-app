@@ -17,7 +17,8 @@
 import { Component }   from '@angular/core';
 import { Router }      from '@angular/router';
 import { AuthserviceService } from '../../authservice.service';
-import { Configs } from '../../configurations';
+//import { Configs } from '../../configurations';
+import { Configs } from '../../../environments/environment';
 
 @Component({
     selector: 'app-applogin',

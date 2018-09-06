@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import 'rxjs/add/operator/map';
-import { Configs } from './configurations';
+//import { Configs } from './configurations';
+import { Configs } from './../environments/environment';
 // import { AuthserviceService } from './authservice.service'
 import { AuthService, TokenPayload } from './auth/auth.service';
 

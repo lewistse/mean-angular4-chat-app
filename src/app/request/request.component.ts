@@ -6,7 +6,8 @@ import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/observable/interval'
 import * as io from 'socket.io-client';
 import * as $ from 'jquery';
-import { Configs } from '../configurations';
+//import { Configs } from '../configurations';
+import { Configs } from '../../environments/environment';
 // import { AuthserviceService } from '../authservice.service';
 import { AuthService, TokenPayload } from '../auth/auth.service';
 import { HttpClient } from '@angular/common/http';

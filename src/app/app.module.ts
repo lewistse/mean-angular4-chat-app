@@ -10,7 +10,8 @@ import { PathLocationStrategy, LocationStrategy } from '@angular/common';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module'
 
-import { Configs } from './configurations';
+//import { Configs } from './configurations';
+import { Configs } from './../environments/environment';
 
 import { ChatService } from './chat.service';
 // import { AuthguardGuard } from './authguard.guard';
