@@ -16,10 +16,10 @@ export class Configs {
   // multiChatPort: string = '3992';
   // multiChatCode: string = 'Aptc123456';
 
-  angularAddr: string = 'https://airpoint.com.hk:4080';
-  expressAddr: string = 'https://airpoint.com.hk:4060';
-  socketIoServerAddr: string = 'https://airpoint.com.hk:3637';   
-  tinkerboardAddr: string = 'https://airpoint.com.hk';
+  angularAddr: string = 'https://cs.roboassistant.ai:4080';
+  expressAddr: string = 'https://cs.roboassistant.ai:4060';
+  socketIoServerAddr: string = 'https://cs.roboassistant.ai:3637';   
+  tinkerboardAddr: string = 'https://cs.roboassistant.ai';
   tinkerport: string = '8006';
   tinkerpassword: string = 'Aptc123456';
 

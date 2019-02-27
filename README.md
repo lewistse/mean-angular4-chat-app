@@ -150,7 +150,7 @@ Execute on client side:
 ng serve -o --port 4080 --env=prod --host 0.0.0.0 --ssl true --ssl-key ./routes/encryption/privkey.pem --ssl-cert ./routes/encryption/cert.pem --public airpoint.com.hk
 
 node version.js
-ng serve -o --port 4080 --configuration=production --host 0.0.0.0 --ssl true --ssl-key ./routes/encryption/privkey.pem --ssl-cert ./routes/encryption/cert.pem --public-host airpoint.com.hk
+ng serve -o --port 4080 --configuration=production --host 0.0.0.0 --ssl true --ssl-key ./routes/encryption/privkey.pem --ssl-cert ./routes/encryption/cert.pem --public-host cs.roboassistant.ai
 
 export GOOGLE_APPLICATION_CREDENTIALS="/home/bchong/Webapps/googleCredentials.json"
 node index.js
