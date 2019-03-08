@@ -588,6 +588,7 @@ export class ChatService {
         });
     });
   }
+ 
 
 // get id using name and package type
   getIdByContactName(name) {    //here we use room as phone_number
@@ -671,6 +672,31 @@ export class ChatService {
         });
     });
   }
+// get all contact id
+  getAllWechatContact() {    //here we use room as phone_number
+    return new Promise((resolve, reject) => {
+      this.http.get(this.serverUrl+'/chat/contact/wechat', { headers: { Authorization: `Bearer ${this.getToken()}` }})
+        // .map(res => res.json())
+        .subscribe(res => {
+          resolve(res);
+        }, (err) => {
+          reject(err);
+        });
+    });
+  }
+
+// get all contact id
+  getAllLineContact() {    //here we use room as phone_number
+    return new Promise((resolve, reject) => {
+      this.http.get(this.serverUrl+'/chat/contact/line', { headers: { Authorization: `Bearer ${this.getToken()}` }})
+        // .map(res => res.json())
+        .subscribe(res => {
+          resolve(res);
+        }, (err) => {
+          reject(err);
+        });
+    });
+  } 
 
   getContactByName(name) {    //here we use room as phone_number
     return new Promise((resolve, reject) => {
@@ -788,6 +814,50 @@ export class ChatService {
          });
     });
   }  
+
+
+  //broadcast Wechat
+  // https://airpoint.com.hk:8006/api/whatsapp/listimage
+  broadcastWechat(data) {
+    return new Promise((resolve, reject) => {
+      console.log("data.message: " +data.message);
+      console.log("data.contactListJson: " +data.contactListJson.contactList);      
+      // console.log("formdata: " +formdata);
+      console.log("data.sessionID: " +data.sessionID);
+      // console.log("formdata.imagefilename: " +formdata.get('imagefilename'));
+      
+     this.http.post('https://cs.roboassistant.ai/wechatBroadcastwebhook3992', data )
+         // .map(res => res.json())
+         .subscribe(res => {
+           resolve(res);
+           // console.log("post successful");
+         }, (err) => {
+           reject(err);
+           // console.log("post failed");
+         });
+    });
+  }  
+
+
+  //broadcast Line
+  // https://airpoint.com.hk:8006/api/whatsapp/listimage
+  broadcastLine(data) {
+    return new Promise((resolve, reject) => {
+      console.log("data.message: " +data.message);
+      console.log("data.contactListJson: " +data.contactListJson);
+      // console.log("formdata.imagefilename: " +formdata.get('imagefilename'));
+      
+     this.http.post('https://cs.roboassistant.ai/lineBroadcastwebhook3992', data )
+         // .map(res => res.json())
+         .subscribe(res => {
+           resolve(res);
+           // console.log("post successful");
+         }, (err) => {
+           reject(err);
+           // console.log("post failed");
+         });
+    });
+  }    
 
   // https://airpoint.com.hk:8006/api/whatsapp/enablebroadcast?action=enablebroadcast
   enableBroadcast(formdata) {

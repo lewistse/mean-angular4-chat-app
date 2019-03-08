@@ -1466,6 +1466,46 @@ router.get('/contact/all', auth, function(req, res, next) {
   }  //end else
 });
 
+// router.get('/contact/wechat', function(req, res, next) { 
+router.get('/contact/wechat', auth, function(req, res, next) { 
+  if (!req.payload._id) {
+    res.status(401).json({
+      "message" : "UnauthorizedError:"
+    });
+  } else {
+    Contact.find({ $and:
+      [ 
+        // { registeredUser: { $exists: false } },
+        { package:"wechat" }
+        // { keyword: { $exists: true} }
+      ]
+    }, function (err, contacts) {
+      if (err) return next(err);
+      res.json(contacts);
+    })
+  }  //end else
+});
+
+// router.get('/contact/line', function(req, res, next) { 
+router.get('/contact/line', auth, function(req, res, next) { 
+  if (!req.payload._id) {
+    res.status(401).json({
+      "message" : "UnauthorizedError:"
+    });
+  } else {
+    Contact.find({ $and:
+      [ 
+        // { registeredUser: { $exists: false } },
+        { package:"line" }
+        // { keyword: { $exists: true} }
+      ]
+    }, function (err, contacts) {
+      if (err) return next(err);
+      res.json(contacts);
+    })
+  }  //end else
+});
+
 // get id using name and package type
 // router.get('/contact/:name', function(req, res, next) { 
 router.get('/contact/:name', auth, function(req, res, next) { 

@@ -113,6 +113,17 @@
 							            <input type="text" class="form-control-static" [(ngModel)]="newBroadcast.jobID" placeholder="Required" name="jobID" >
 							          </div> -->
 							          <div class="form-group">
+							            <label class="col-sm-4 control-label">Apps</label>						
+							            <div class="input-group form-control-static">
+										        <input id = "radio-button" type="radio" [(ngModel)]="whatsapp" (click)="clickWhatsapp()" name="whatsapp" class="minimal" value="whatsapp">
+										        Whatsapp
+										        <input id = "radio-button" type="radio" [(ngModel)]="wechat" (click)="clickWechat()" name="wechat" class="minimal" value="wechat" >
+										        Wechat										        
+										        <input id = "radio-button" type="radio" [(ngModel)]="line" (click)="clickLine()" name="line" class="minimal" value="line">
+										        Line<br>
+									        </div>
+												</div>	
+							          <div class="form-group" *ngIf ="showBroadcastMode">
 							            <label class="col-sm-4 control-label">Broadcast Mode</label>						
 							            <div class="input-group form-control-static">
 										        <input id = "radio-button" type="radio" [(ngModel)]="basic" (click)="clickBasic()" name="basic" class="minimal" value="basic">
@@ -132,7 +143,7 @@
 										        No<br>
 									        </div>
 												</div>
-							          <div class="form-group">
+							          <div class="form-group" *ngIf ="showCsvFile">
 							            <label class="col-sm-4 control-label">CSV file</label>
 							            <input #myCsv type="file" class="form-control-static" (change)="onCSVSelected($event)" placeholder="Required" #fileInput name="csvFile" required="" >
 							          </div>						          
@@ -157,12 +168,6 @@
  														<emoji-mart *ngIf="popUpEmoji" (emojiClick)="addEmoji($event)" showPreview="false"></emoji-mart> 														
  													</div>
  												</div>
-							          <!-- <emoji-mart title="Pick your emoji…" emoji="point_up"></emoji-mart> -->
-												<!-- <emoji-mart set="emojione"></emoji-mart> -->
-												<!-- <emoji-mart (emojiClick)="addEmoji($event)"></emoji-mart> -->
-												<!-- <emoji-mart [style]="{ position: 'absolute', bottom: '20px', right: '20px' }"></emoji-mart> -->
-												<!-- <emoji-mart [i18n]="{ search: 'Recherche', categories: { search: 'Résultats de recherche', recent: 'Récents' } }"></emoji-mart> -->
-							          						          
 	                      <div class="form-group">
 							            <label class="col-sm-4 control-label">Select Image or PDF	       
 	                        </label>
@@ -182,12 +187,43 @@
 	                        <pdf-viewer id="pdf-viewer" [src]="pdfSrc" [render-text]="true"style="display: block;" [page]="1" [show-all]="false" [zoom]="0.5"></pdf-viewer>							            
 	                      </div>
 
+			                  <div class="form-group" *ngIf ="selectUser"> 
+			                    <div class="form-group center">
+			                      <label class="col-sm-4 control-label">Selected Users</label>
+			                      <button  id="select-user-button" type="button" class="btn btn-default btn-sm" (click)="selectUsers()" > Select </button>
+			                    </div>                        
+			                  </div>
+
+					              <div #scrollTable class="box-body no-padding" *ngIf="showUsers; else searchPage">
+					                <table class="table">
+					                  <thead>
+					                    <tr>
+					                      <th>Apps</th>
+					                      <th>Name</th>
+					                      <th>ID</th>
+					                      <th>Select</th>
+					                    </tr>
+					                  </thead>
+					                <tbody id="table-body">
+					                  <tr *ngFor="let users of allContacts">
+					                  <td>{{users.package}}</td>
+					                  <td>{{users.name }}</td>
+					                  <td>{{users.id}}</td>
+					                  <td>       
+					                      <button type="button" class="btn btn-primary btn-xs" id="copy-info" (click)="addUsers(users.name, users.id)"> Add </button>
+					                    </td>
+					                    </tr>
+					                  </tbody>
+					                </table>             
+					              </div>			                  
+
 			                  <div id = edit-button class="form-group"> 
 			                    <div class="form-group center">
 			                      <label class="col-sm-4 control-label"></label>
 			                      <button  type="submit" class="btn btn-success btn" [disabled]="!addBroadcastForm.form.valid"> Create </button>
 			                    </div>                        
-			                  </div> 
+			                  </div>		                  
+
 						        	</div>
 						        </form>
 		              </div>  

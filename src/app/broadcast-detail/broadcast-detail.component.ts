@@ -47,7 +47,16 @@ export class BroadcastDetailComponent implements OnInit {
   basic = null;
   flash = null;
   group = null;
-    
+  whatsapp = null;
+  wechat = null;
+  line = null;
+  showCsvFile: boolean = true;
+  showBroadcastMode: boolean = true;
+  selectUser: boolean = false;
+  showUsers: boolean = false;
+  allContacts: any;
+  addUserToList: any = [];
+
   @ViewChild('myCsv') myInputVariable: ElementRef;
 
   broadcastDetail = { jobID:'', message: '', contactListCsvName:'', imagefile:'', imagefilename:'', notSendAck:'', prependContactName:'', jobStatus:'', groupName:'', senderPhoneNumber:''};    
@@ -62,6 +71,7 @@ export class BroadcastDetailComponent implements OnInit {
 //    this.newBroadcast = { jobID:'', message:'', contactListCsvName: '', imagefile:'', imagefilename:'', notSendAck:'',prependContactName:'', jobStatus:'', groupName:'', senderPhoneNumber:''};  
   	this.newBroadcast.prependContactName = "Y";	//Yes
     this.flash = "flash";
+    this.whatsapp = "whatsapp"
     this.showSenderPhoneNumber = false;
 
     this.chatService.change.subscribe(viewBroadcast => {
@@ -123,8 +133,22 @@ export class BroadcastDetailComponent implements OnInit {
    
   saveBroadcastDetail(){
 
-  	console.log("create new broadcast job");  	
-		// console.log("prepend name: " + this.newBroadcast.prependContactName);
+    if (this.whatsapp == 'whatsapp'){
+      
+      console.log("create new broadcast job");    
+      // console.log("prepend name: " + this.newBroadcast.prependContactName);
+    }
+
+  	
+    if (this.wechat == 'wechat'){
+
+      console.log("create new Wechat broadcast job");  
+    }
+    
+    if (this.line == 'line'){
+      
+      console.log("create new Line broadcast job");
+    }
 
   	this.newBroadcast.jobStatus = "Pending";
 
@@ -144,7 +168,7 @@ export class BroadcastDetailComponent implements OnInit {
 				this.enableBroadcast = res;
 				console.log("Enable broadcast: " +this.enableBroadcast.success);
 				
-          if (this.enableBroadcast.success == true){
+        if (this.enableBroadcast.success == true){
 
             this.tinkerKey = "running";
             this.updateTinkerStatus.enableBroadcast = "true";
@@ -157,136 +181,227 @@ export class BroadcastDetailComponent implements OnInit {
               console.log(err);        
             });  
 
-          }
+        }
 				
-				// check if image is attached and post to tinker 				  
+        // check if image is attached and post to tinker 				  
 				if ((this.url.length != 0) || (this.pdfSrc.length !=0)){	//broadcast image
 
 					console.log("newBroadcast.imagefile: " + this.compressedImage);
   				console.log("newBroadcast.imagefilename: " + this.selectedImage.name);
 					
-			    //construct form data
-			    var boardcastImage = new FormData();
-			    boardcastImage.append('sessionID', sID);
-			    // boardcastImage.append('message', this.newBroadcast.message);
-			    boardcastImage.append('prependContactName', this.newBroadcast.prependContactName); 					
-			    boardcastImage.append('contactListCsv', this.csvFile);			    
-			    boardcastImage.append('imagefilename', this.selectedImage.name);
-			    boardcastImage.append('imagefile', this.compressedImage);  				
+          if (this.whatsapp == 'whatsapp'){
+  			    //construct form data
+  			    var boardcastImage = new FormData();
+  			    boardcastImage.append('sessionID', sID);
+  			    // boardcastImage.append('message', this.newBroadcast.message);
+  			    boardcastImage.append('prependContactName', this.newBroadcast.prependContactName); 					
+  			    boardcastImage.append('contactListCsv', this.csvFile);			    
+  			    boardcastImage.append('imagefilename', this.selectedImage.name);
+  			    boardcastImage.append('imagefile', this.compressedImage);  				
 
-          if ((this.newBroadcast.groupName !=undefined)&&(this.newBroadcast.senderPhoneNumber !=undefined)){
-            // boardcastImage.append('groupName', this.newBroadcast.groupName);
-            boardcastImage.append('senderPhoneNumber', this.newBroadcast.senderPhoneNumber);   
-            this.urlMessage = this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName;
+            if ((this.newBroadcast.groupName !=undefined)&&(this.newBroadcast.senderPhoneNumber !=undefined)){
+              // boardcastImage.append('groupName', this.newBroadcast.groupName);
+              boardcastImage.append('senderPhoneNumber', this.newBroadcast.senderPhoneNumber);   
+              this.urlMessage = this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName;
 
-          } else {
+            } else {
 
-            this.urlMessage = this.newBroadcast.message;
-            // console.log('encodeURI: '+encodeURI(this.urlMessage));
+              this.urlMessage = this.newBroadcast.message;
+              // console.log('encodeURI: '+encodeURI(this.urlMessage));
+            }
+
+  					//write to DB
+  					this.chatService.broadcastImage(boardcastImage, encodeURI(this.urlMessage)).then((res) => {  //from chatService, 
+  				  
+  				    // window.alert('Broadcast job with image is submitted successfully!');
+
+  				    this.jobDetail = res;
+
+  						if (this.jobDetail.jobID !=undefined){
+
+  							this.newBroadcast.jobID = this.jobDetail.jobID;
+  					  	this.newBroadcast.contactListCsvName = this.csvFile.name;						  	
+  					  	this.newBroadcast.imagefilename = this.selectedImage.name;
+
+                console.log('this.fileExtention' +this.fileExtention);
+
+                if (this.fileExtention =='pdf'){
+
+                  this.newBroadcast.imagefile = this.pdfSrc;
+
+                } else {
+
+                  this.newBroadcast.imagefile = this.url;
+
+                }
+  				
+
+  							//write to DB
+  							this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+  						  
+  						    // window.alert('Broadcast job is uploaded to DB successfully!');
+  						  }, (err) => {
+  						    console.log(err);
+  						    window.alert('Write Broadcast to DB failed!');
+  						  });	  
+  						} else {
+  							console.log("not able to get job ID");
+  						}
+
+  				  	this.viewBroadcastDetail();  
+
+  				  }, (err) => {
+  				    console.log(err);
+  				    window.alert('Add Broadcast job failed!');
+  				  });	  	
+          }		
+
+          if (this.wechat == 'wechat'){ 
+
+            console.log("new wechat image broadcast flow");
+          }
+          
+          if (this.line == 'line'){ 
+
+            console.log("new Line image broadcast flow");
           }
 
-					//write to DB
-					this.chatService.broadcastImage(boardcastImage, encodeURI(this.urlMessage)).then((res) => {  //from chatService, 
-				  
-				    // window.alert('Broadcast job with image is submitted successfully!');
-
-				    this.jobDetail = res;
-
-						if (this.jobDetail.jobID !=undefined){
-
-							this.newBroadcast.jobID = this.jobDetail.jobID;
-					  	this.newBroadcast.contactListCsvName = this.csvFile.name;						  	
-					  	this.newBroadcast.imagefilename = this.selectedImage.name;
-
-              console.log('this.fileExtention' +this.fileExtention);
-
-              if (this.fileExtention =='pdf'){
-
-                this.newBroadcast.imagefile = this.pdfSrc;
-
-              } else {
-
-                this.newBroadcast.imagefile = this.url;
-
-              }
-				
-
-							//write to DB
-							this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
-						  
-						    // window.alert('Broadcast job is uploaded to DB successfully!');
-						  }, (err) => {
-						    console.log(err);
-						    window.alert('Write Broadcast to DB failed!');
-						  });	  
-						} else {
-							console.log("not able to get job ID");
-						}
-
-				  	this.viewBroadcastDetail();  
-
-				  }, (err) => {
-				    console.log(err);
-				    window.alert('Add Broadcast job failed!');
-				  });	  				  
 
 				} else {	//image not exists
 
 					console.log("No imagefile");
 
-			    //construct form data
-			    var boardcastMessage = new FormData();
+          if (this.whatsapp == 'whatsapp'){
+  			    //construct form data
+  			    var boardcastMessage = new FormData();
 
-			    boardcastMessage.append('sessionID', sID);
-			    // boardcastMessage.append('message', this.newBroadcast.message);
-			    boardcastMessage.append('prependContactName', this.newBroadcast.prependContactName); 					
-			    boardcastMessage.append('contactListCsv', this.csvFile);
+  			    boardcastMessage.append('sessionID', sID);
+  			    // boardcastMessage.append('message', this.newBroadcast.message);
+  			    boardcastMessage.append('prependContactName', this.newBroadcast.prependContactName); 					
+  			    boardcastMessage.append('contactListCsv', this.csvFile);
 
-          if ((this.newBroadcast.groupName !='')&&(this.newBroadcast.senderPhoneNumber !='')){
-            // boardcastImage.append('groupName', this.newBroadcast.groupName);
-            boardcastMessage.append('senderPhoneNumber', this.newBroadcast.senderPhoneNumber);   
-            this.urlMessage = this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName;
-            // console.log('group sent encodeURI: '+encodeURI(this.urlMessage));
-            console.log(this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName);
+            if ((this.newBroadcast.groupName !='')&&(this.newBroadcast.senderPhoneNumber !='')){
+              // boardcastImage.append('groupName', this.newBroadcast.groupName);
+              boardcastMessage.append('senderPhoneNumber', this.newBroadcast.senderPhoneNumber);   
+              this.urlMessage = this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName;
+              // console.log('group sent encodeURI: '+encodeURI(this.urlMessage));
+              console.log(this.newBroadcast.message + '&groupName=' + this.newBroadcast.groupName);
 
-          } else {
+            } else {
 
-            this.urlMessage = this.newBroadcast.message;
-            // console.log('encodeURI: '+encodeURI(this.urlMessage));
+              this.urlMessage = this.newBroadcast.message;
+              // console.log('encodeURI: '+encodeURI(this.urlMessage));
+            }
+
+  					//write to DB
+  					this.chatService.broadcastMessage(boardcastMessage, encodeURI(this.urlMessage)).then((res) => {  //from chatService, 
+  				  
+  				    // window.alert('Broadcast job with message only is submitted successfully!');
+
+  				    this.jobDetail = res;
+
+  						if (this.jobDetail.jobID !=undefined){
+
+  							this.newBroadcast.jobID = this.jobDetail.jobID;
+  					  	this.newBroadcast.contactListCsvName = this.csvFile.name;		
+
+  							//write to DB
+  							this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+  						  
+  						    // window.alert('Broadcast job is uploaded to DB successfully!');
+  						  }, (err) => {
+  						    console.log(err);
+  						    window.alert('Write Broadcast to DB failed!');
+  						  });	  
+  						} else {
+  							console.log("not able to get job ID");
+  						}
+
+  				    this.viewBroadcastDetail();
+
+  				  }, (err) => {
+  				    console.log(err);
+  				    window.alert('Add Broadcast job failed!');
+  				  });	
           }
 
-					//write to DB
-					this.chatService.broadcastMessage(boardcastMessage, encodeURI(this.urlMessage)).then((res) => {  //from chatService, 
-				  
-				    // window.alert('Broadcast job with message only is submitted successfully!');
+          if (this.whatsapp != 'whatsapp'){
 
-				    this.jobDetail = res;
+            
+            if (this.wechat == 'wechat'){ 
+              console.log("new wechat text broadcast flow");
+              var jsonWechatData = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", contactListJson:{contactList: this.addUserToList}}
+              //write to tinker
+              this.chatService.broadcastWechat(jsonWechatData).then((res) => {  //from chatService, 
+              
+                // window.alert('Broadcast job with message only is submitted successfully!');
+                console.log("wechat broadcasted");
+                this.jobDetail = res;
 
-						if (this.jobDetail.jobID !=undefined){
+                if (this.jobDetail.jobID !=undefined){
 
-							this.newBroadcast.jobID = this.jobDetail.jobID;
-					  	this.newBroadcast.contactListCsvName = this.csvFile.name;		
+                  this.newBroadcast.jobID = this.jobDetail.jobID;
+                  this.newBroadcast.contactListCsvName = "Wechat User list";    
 
-							//write to DB
-							this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
-						  
-						    // window.alert('Broadcast job is uploaded to DB successfully!');
-						  }, (err) => {
-						    console.log(err);
-						    window.alert('Write Broadcast to DB failed!');
-						  });	  
-						} else {
-							console.log("not able to get job ID");
-						}
+                  //write to DB
+                  this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+                  
+                    // window.alert('Broadcast job is uploaded to DB successfully!');
+                  }, (err) => {
+                    console.log(err);
+                    window.alert('Write Broadcast to DB failed!');
+                  });    
+                } else {
+                  console.log("not able to get job ID");
+                }
 
-				    this.viewBroadcastDetail();
+                this.viewBroadcastDetail();
 
-				  }, (err) => {
-				    console.log(err);
-				    window.alert('Add Broadcast job failed!');
-				  });	
+              }, (err) => {
+                console.log(err);
+                window.alert('Add Wechat Broadcast job failed!');
+              });
+              
+            }
+            
+            if (this.line == 'line'){ 
+              console.log("new Line text broadcast flow");
+              var jsonLineData = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", contactListJson:{contactList: this.addUserToList}}
+              //write to tinker
+              this.chatService.broadcastLine(jsonLineData).then((res) => {  //from chatService, 
+                
+                console.log("line broadcasted");
+                // window.alert('Broadcast job with message only is submitted successfully!');
 
-				}
+                this.jobDetail = res;
+
+                if (this.jobDetail.jobID !=undefined){
+
+                  this.newBroadcast.jobID = this.jobDetail.jobID;
+                  this.newBroadcast.contactListCsvName = "Line User list";    
+
+                  //write to DB
+                  this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+                  
+                    // window.alert('Broadcast job is uploaded to DB successfully!');
+                  }, (err) => {
+                    console.log(err);
+                    window.alert('Write Broadcast to DB failed!');
+                  });    
+                } else {
+                  console.log("not able to get job ID");
+                }
+
+                this.viewBroadcastDetail();
+
+              }, (err) => {
+                console.log(err);
+                window.alert('Add Line Broadcast job failed!');
+              });
+            
+            }            
+          }
+        }
 
 		  }, (err) => {
 		    console.log(err);
@@ -296,9 +411,6 @@ export class BroadcastDetailComponent implements OnInit {
 	  } else {
 	  	console.log('Broadcast job is cancelled')
 	  }
-
-
-
 
   }
 
@@ -645,4 +757,115 @@ export class BroadcastDetailComponent implements OnInit {
 //      this.csvFile.name="";
       this.myInputVariable.nativeElement.value = "";
   }
+
+  clickWhatsapp(){
+    if (this.whatsapp!="whatsapp"){
+      this.createBroadcast();
+    }
+    this.whatsapp="whatsapp";
+    this.flash="flash";    
+    this.showCsvFile = true;
+    this.wechat = null;
+    this.line = null;
+    this.showBroadcastMode = true;
+    this.showGroupName = true;
+    this.selectUser = false;
+    this.showUsers = false;
+//     this.showSenderPhoneNumber = true;
+//     this.basic = null;
+//     this.flash = null;
+//       this.csvFile = null;
+// //      this.csvFile.name="";
+      // this.myInputVariable.nativeElement.value = "";
+  }
+
+  clickWechat(){
+    if (this.wechat!="wechat"){
+      this.createBroadcast();
+    }
+    this.wechat="wechat";
+    this.showCsvFile = false;
+    this.whatsapp = null;
+    this.line = null;
+    this.showBroadcastMode = false;
+    this.showGroupName = false;
+    this.selectUser = true;
+    this.showUsers = false;
+//     this.showSenderPhoneNumber = true;
+//     this.basic = null;
+//     this.flash = null;
+//       this.csvFile = null;
+// //      this.csvFile.name="";
+      // this.myInputVariable.nativeElement.value = "";
+  }
+
+  clickLine(){
+    if (this.line!="line"){
+      this.createBroadcast();
+    }
+    this.line="line";
+    this.showCsvFile = false;
+    this.wechat = null;
+    this.whatsapp = null;
+    this.showBroadcastMode = false;
+    this.showGroupName = false;
+    this.selectUser = true;
+    this.showUsers = false;
+//     this.showSenderPhoneNumber = true;
+//     this.basic = null;
+//     this.flash = null;
+//       this.csvFile = null;
+// //      this.csvFile.name="";
+      // this.myInputVariable.nativeElement.value = "";
+  } 
+
+  selectUsers(){
+    
+    this.showUsers = true;
+    this.addUserToList =[];
+    console.log("addUserToList" +this.addUserToList);    
+    if (this.wechat=="wechat"){
+      console.log("select wechat users");
+      this.chatService.getAllWechatContact().then((res) => {  //from chatService, 
+        this.allContacts = res;
+      }, (err) => {
+        console.log(err);
+      });      
+    }
+    
+    if (this.line=="line"){
+      console.log("select line users");
+      this.chatService.getAllLineContact().then((res) => {  //from chatService, 
+        this.allContacts = res;
+      }, (err) => {
+        console.log(err);
+      });      
+    }    
+  }
+
+  addUsers(name, id){
+    console.log("user info: " +name +id);
+
+    if (this.wechat=="wechat"){
+    
+      var broadcastWechatObj = {name:'' , wechatId: ''};
+      broadcastWechatObj.name = name;
+      broadcastWechatObj.wechatId = id;
+      this.addUserToList.push(broadcastWechatObj);
+      console.log("addUserToList" +this.addUserToList);
+    
+    }
+    
+    if (this.line=="line"){
+    
+      var broadcastLineObj = {name: '', lineId: ''};
+      broadcastLineObj.name = name;
+      broadcastLineObj.lineId = id;
+      this.addUserToList.push(broadcastLineObj);
+      console.log("addUserToList" +this.addUserToList);
+    
+    }
+
+  }       
+
 }

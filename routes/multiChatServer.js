@@ -92,7 +92,8 @@ const wechatClient = WechatClient.connect({
 //var tokenManager = new TokenManager(wechatConfig.appID, wechatConfig.appSecret);
 //var accessToken = '';
 
-var jsonParser = bodyParser.json()
+var jsonParser = bodyParser.json();
+
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // Imports the Google Cloud client library
@@ -1064,9 +1065,9 @@ setupOperatorChannel();
 // })
 
 // CSP register and unregister routes
-app.post('/api/csp/register', (req, res) => {
+app.post('/api/csp/register', jsonParser, (req, res) => {
   var jsonMesg = {};
-  if ((req.query.sessionID === serverConfig.cspToken)&&(req.query.action === "register")) {
+  if ((req.body.sessionID === serverConfig.cspToken)&&(req.body.action === "register")) {
     operatorHasLogin = true
     jsonMesg.success = true;
     res.send(jsonMesg)
@@ -1076,10 +1077,9 @@ app.post('/api/csp/register', (req, res) => {
   }
 });
 
-app.post('/api/csp/unregister', (req, res) => {
+app.post('/api/csp/unregister', jsonParser, (req, res) => {
   var jsonMesg = {};
-  if ((req.query.sessionID === serverConfig.cspToken)&&(req.query.action === "unregister")) {
-    incomingChatUser.splice(0, incomingChatUser.length);
+  if ((req.body.sessionID === serverConfig.cspToken)&&(req.body.action === "unregister")) {
     operatorHasLogin = false
     jsonMesg.success = true;
     res.send(jsonMesg)
@@ -1104,6 +1104,238 @@ app.get('/api/csp/refreshSocketIo', (req, res) => {
   jsonMesg.socketId = socketOperator.id;
   res.send(jsonMesg)
   socketOperator.emit("user", "operatorSessionUserNonAndroid");
+});
+
+app.post('/wechatBroadcastwebhook', bodyParser.json({limit: '16mb'}), (req, res) => {
+  var jsonMesg = {};
+  var userNotFound = [];
+  var userSendFail = [];
+
+  console.log("For Ben: " + req.body.sessionID);
+  console.log("For Ben: " + req.body.message);
+
+  if (req.body.sessionID === serverConfig.cspToken) {
+    req.body.contactListJson.contactList.forEach(function(table) {
+      var name = table.name;
+      var wechatId = table.wechatId;
+
+      console.log("For Ben wechatid: " + wechatId);
+      console.log("For Ben name: " + name);
+
+      var found = false;
+      if (userData != null){
+        for(var i = 0; i < userData.user.length; i++) {
+          if (userData.user[i].id == wechatId) {
+            found = true;
+            console.log(userData.user[i].id + " " + userData.user[i].name + " " + userData.user[i].package + " found");
+            break;
+          }
+        }
+      }
+
+      if (found===false){
+        userNotFound.push(wechatId);
+      }
+
+
+      if ((name)&&(wechatId)&&(found)){
+        console.log('name: '+name);
+        console.log('wechatId: '+wechatId);
+
+        if ((req.body.imagefilename) && (req.body.imagefileBase64)&&(req.body.imagefilename!="")&&((req.body.imagefileBase64)!="")){
+          var filename = "routes/image/"+req.body.imagefilename;
+          console.log('filename: ' + filename);
+    
+          require("fs").writeFile(filename, req.body.imagefileBase64, 'base64', function(err) {
+            if (err){
+                  jsonMesg.success = false;
+                  jsonMesg.error = "Unable to decode/save base64 image";
+            } else {
+              uploadImageToWechat(filename, function(reply,media_id){
+                if (reply != "error"){
+                      wechatClient.sendImage(wechatId, media_id).catch(error => {
+                        userSendFail.push(wechatId);
+                      });
+                } else {
+                  jsonMesg.success = false;
+                  jsonMesg.error = "upload image to wechat server fails";
+                }
+              });
+            }
+          });
+        } else if (req.body.message){
+          var finalMessage = "";
+          if (req.body.prependContactName==="Y"){
+            finalMessage = "Dear " + name + ",\n\n" + req.body.message;
+
+          } else {
+            finalMessage = req.body.message;
+          }
+
+          wechatClient.sendText(wechatId, finalMessage).catch(error => {
+            userSendFail.push(wechatId);
+          });
+        }
+      }
+
+
+    });
+
+    //console.log(req.body.imagefileBase64);
+    if ((userNotFound.length>0)||(userSendFail.length>0)){
+      jsonMesg.success = false;
+      
+      var userNotFoundMesg = "";
+      if (userNotFound.length>0){
+        userNotFoundMesg = "User not found in this group: "
+        for(var j = 0 , len = userNotFound.length ; j < len ; j++){
+          userNotFoundMesg += userNotFound[j];
+          if (j<len-1){
+            userNotFoundMesg += ", "
+          }
+        }
+        jsonMesg.error = userNotFoundMesg;
+      }
+
+      var userSendFailMesg = "User send failed: "
+      if (userSendFail.length>0){
+        var userSendFailMesg = ""
+        for(var j = 0 , len = userSendFail.length ; j < len ; j++){
+          userSendFailMesg += userSendFail[j];
+          if (j<len-1){
+            userSendFailMesg += ", "
+          }
+        }
+        if (userNotFound.length>0){
+          jsonMesg.error += ", ";
+        }
+        jsonMesg.error += userSendFailMesg;
+      }
+    } else {
+      jsonMesg.success = true;
+    }
+    res.send(jsonMesg)
+  } else {
+    jsonMesg.success = false;
+    jsonMesg.error = "Token is not correct";
+    res.send(jsonMesg)
+  }
+});
+
+app.post('/lineBroadcastwebhook', bodyParser.json({limit: '16mb'}), (req, res) => {
+  var jsonMesg = {};
+  var userNotFound = [];
+  var userSendFail = [];
+
+  //console.log(req.body);
+  if (req.body.sessionID === serverConfig.cspToken) {
+    req.body.contactListJson.contactList.forEach(function(table) {
+      var name = table.name;
+      var lineId = table.lineId;
+      var found = false;
+      if (userData != null){
+        for(var i = 0; i < userData.user.length; i++) {
+          if (userData.user[i].id == lineId) {
+            found = true;
+            console.log(userData.user[i].id + " " + userData.user[i].name + " " + userData.user[i].package + " found");
+            break;
+          }
+        }
+      }
+
+      if (found===false){
+        userNotFound.push(lineId);
+      }
+
+
+      if ((name)&&(lineId)&&(found)){
+        console.log('name: '+name);
+        console.log('lineId: '+lineId);
+
+        if ((req.body.imagefilename) && (req.body.imagefileBase64)&&(req.body.imagefilename!="")&&((req.body.imagefileBase64)!="")){
+          var filename = "routes/image/"+req.body.imagefilename;
+          console.log('filename: ' + filename);
+    
+          require("fs").writeFile(filename, req.body.imagefileBase64, 'base64', function(err) {
+            if (err){
+                  jsonMesg.success = false;
+                  jsonMesg.error = "Unable to decode/save base64 image";
+            } else {
+                if (ngrokURL === ""){
+                  var url = lineConfig.serverUrl+"/"+req.body.imagefilename
+                  console.log(url);
+                  lineClient.pushImage(lineId, {
+                      originalContentUrl: url,
+                      previewImageUrl: url
+                  });                  
+                } else {
+                  var url = ngrokURL+filename
+                  console.log(url);
+                  lineClient.pushImage(lineId, {
+                      originalContentUrl: url,
+                      previewImageUrl: url
+                  });                  
+                }
+
+            }
+          });
+        } else if (req.body.message){
+          var finalMessage = "";
+          if (req.body.prependContactName==="Y"){
+            finalMessage = "Dear " + name + ",\n\n" + req.body.message;
+
+          } else {
+            finalMessage = req.body.message;
+          }
+
+          lineClient.pushText(lineId, finalMessage).catch(error => {
+            userSendFail.push(lineId);
+          });
+        }
+      }
+
+
+    });
+
+    //console.log(req.body.imagefileBase64);
+    if ((userNotFound.length>0)||(userSendFail.length>0)){
+      jsonMesg.success = false;
+      
+      var userNotFoundMesg = "";
+      if (userNotFound.length>0){
+        userNotFoundMesg = "User not found in this group: "
+        for(var j = 0 , len = userNotFound.length ; j < len ; j++){
+          userNotFoundMesg += userNotFound[j];
+          if (j<len-1){
+            userNotFoundMesg += ", "
+          }
+        }
+        jsonMesg.error = userNotFoundMesg;
+      }
+
+      var userSendFailMesg = "User send failed: "
+      if (userSendFail.length>0){
+        var userSendFailMesg = ""
+        for(var j = 0 , len = userSendFail.length ; j < len ; j++){
+          userSendFailMesg += userSendFail[j];
+          if (j<len-1){
+            userSendFailMesg += ", "
+          }
+        }
+        if (userNotFound.length>0){
+          jsonMesg.error += ", ";
+        }
+        jsonMesg.error += userSendFailMesg;
+      }
+    } else {
+      jsonMesg.success = true;
+    }
+    res.send(jsonMesg)
+  } else {
+    jsonMesg.success = false;
+    jsonMesg.error = "Token is not correct";
+    res.send(jsonMesg)
+  }
 });
 
 // Twilio Routes
@@ -1224,7 +1456,7 @@ function getWechatUsersOpenId(callback){
               if (err) {
                 console.log("error in http get");
                 callback("error", err)
-              }else {
+              } else {
                 //console.log(body);
                  var obj = JSON.parse(body.body);
                  for(var j = 0 , len = obj.data.openid.length ; j < len ; j++){
@@ -1293,7 +1525,7 @@ function getLineUserDetail(userid, callback){
 
 function readUserJsonFile(){
   try {
-     userData = require(serverConfig.userDataFilename);
+     userData = require("../"+serverConfig.userDataFilename);
      console.log(userData);
   } catch ( err ) {
      console.log(serverConfig.userDataFilename + " not found");
