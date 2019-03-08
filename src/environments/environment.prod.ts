@@ -16,18 +16,28 @@ export class Configs {
   // multiChatPort: string = '3992';
   // multiChatCode: string = 'Aptc123456';
 
+  // 102 setting
+  // angularAddr: string = 'https://cs.roboassistant.ai:4080';
+  // expressAddr: string = 'https://cs.roboassistant.ai:4060';
+  // socketIoServerAddr: string = 'https://cs.roboassistant.ai:3637';   
+  // tinkerboardAddr: string = 'https://cs.roboassistant.ai';
+  // tinkerport: string = '8006';
+  // tinkerpassword: string = 'Aptc123456';
+
+  //128 setting
   angularAddr: string = 'https://cs.roboassistant.ai:4080';
-  expressAddr: string = 'https://cs.roboassistant.ai:4060';
-  socketIoServerAddr: string = 'https://cs.roboassistant.ai:3637';   
+  expressAddr: string = 'https://cs.roboassistant.ai:3004';
+  socketIoServerAddr: string = 'https://cs.roboassistant.ai:3003';   
   tinkerboardAddr: string = 'https://cs.roboassistant.ai';
-  tinkerport: string = '8006';
+  tinkerport: string = '8013';
   tinkerpassword: string = 'Aptc123456';
 
-  ngrok: boolean = true;  //true = ngrok, false = 443 route server
+
+  ngrok: boolean = false;  //true = ngrok, false = 443 route server
 
   multiChatNgrokAddr: string = ' https://79fec3a3.ngrok.io'; 
   multiChatAddr: string = 'https://cs.roboassistant.ai'; 
-  multiChatPort: string = '3891';
+  multiChatPort: string = '3992';
   multiChatCode: string = 'Aptc123456';
   
 

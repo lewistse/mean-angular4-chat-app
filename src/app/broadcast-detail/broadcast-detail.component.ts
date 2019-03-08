@@ -56,6 +56,7 @@ export class BroadcastDetailComponent implements OnInit {
   showUsers: boolean = false;
   allContacts: any;
   addUserToList: any = [];
+  disableButton: boolean = false;
 
   @ViewChild('myCsv') myInputVariable: ElementRef;
 
@@ -258,12 +259,108 @@ export class BroadcastDetailComponent implements OnInit {
 
           if (this.wechat == 'wechat'){ 
 
-            console.log("new wechat image broadcast flow");
+            console.log("new wechat image broadcast flow");   
+                        
+            var base64WechatImage = ((this.url).split(",")[1]);
+            var jsonWechatImage = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", imagefilename:this.selectedImage.name, imagefileBase64:base64WechatImage, contactListJson:{contactList: this.addUserToList}}
+             console.log("wechat image:" +base64WechatImage);
+
+            //write to DB
+            this.chatService.broadcastWechat(jsonWechatImage).then((res) => {  //from chatService, 
+            
+              // window.alert('Broadcast job with image is submitted successfully!');
+
+              this.jobDetail = res;
+
+              if (this.jobDetail.jobID !=undefined){
+
+                this.newBroadcast.jobID = this.jobDetail.jobID;
+                this.newBroadcast.contactListCsvName = "Wechat User list";                
+                this.newBroadcast.imagefilename = this.selectedImage.name;
+
+                console.log('this.fileExtention' +this.fileExtention);
+
+                if (this.fileExtention =='pdf'){
+
+                  this.newBroadcast.imagefile = this.pdfSrc;
+
+                } else {
+
+                  this.newBroadcast.imagefile = this.url;
+
+                }
+          
+
+                //write to DB
+                this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+                
+                  // window.alert('Broadcast job is uploaded to DB successfully!');
+                }, (err) => {
+                  console.log(err);
+                  window.alert('Write Broadcast to DB failed!');
+                });    
+              } else {
+                console.log("not able to get job ID");
+              }
+
+              this.viewBroadcastDetail();  
+
+            }, (err) => {
+              console.log(err);
+              window.alert('Add Broadcast job failed!');
+            });               
           }
           
           if (this.line == 'line'){ 
 
             console.log("new Line image broadcast flow");
+            var base64LineImage = ((this.url).split(",")[1]);            
+            var jsonLineImage = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", imagefilename:this.selectedImage.name, imagefileBase64:base64LineImage, contactListJson:{contactList: this.addUserToList}}
+
+            //write to DB
+            this.chatService.broadcastLine(jsonLineImage).then((res) => {  //from chatService, 
+            
+              // window.alert('Broadcast job with image is submitted successfully!');
+
+              this.jobDetail = res;
+
+              if (this.jobDetail.jobID !=undefined){
+
+                this.newBroadcast.jobID = this.jobDetail.jobID;
+                this.newBroadcast.contactListCsvName = "Line user list";                
+                this.newBroadcast.imagefilename = this.selectedImage.name;
+
+                console.log('this.fileExtention' +this.fileExtention);
+
+                if (this.fileExtention =='pdf'){
+
+                  this.newBroadcast.imagefile = this.pdfSrc;
+
+                } else {
+
+                  this.newBroadcast.imagefile = this.url;
+
+                }
+          
+
+                //write to DB
+                this.chatService.saveBroadcast(this.newBroadcast).then((res) => {  //from chatService, 
+                
+                  // window.alert('Broadcast job is uploaded to DB successfully!');
+                }, (err) => {
+                  console.log(err);
+                  window.alert('Write Broadcast to DB failed!');
+                });    
+              } else {
+                console.log("not able to get job ID");
+              }
+
+              this.viewBroadcastDetail();  
+
+            }, (err) => {
+              console.log(err);
+              window.alert('Add Broadcast job failed!');
+            });               
           }
 
 
@@ -853,7 +950,7 @@ export class BroadcastDetailComponent implements OnInit {
       broadcastWechatObj.wechatId = id;
       this.addUserToList.push(broadcastWechatObj);
       console.log("addUserToList" +this.addUserToList);
-    
+
     }
     
     if (this.line=="line"){
@@ -863,7 +960,7 @@ export class BroadcastDetailComponent implements OnInit {
       broadcastLineObj.lineId = id;
       this.addUserToList.push(broadcastLineObj);
       console.log("addUserToList" +this.addUserToList);
-    
+
     }
 
   }       
