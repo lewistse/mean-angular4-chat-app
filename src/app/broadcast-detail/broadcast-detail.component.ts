@@ -57,6 +57,8 @@ export class BroadcastDetailComponent implements OnInit {
   allContacts: any;
   addUserToList: any = [];
   disableButton: boolean = false;
+  selectWhatsappFile: boolean = true;
+  selectNonWhatsappFile: boolean = false;
 
   @ViewChild('myCsv') myInputVariable: ElementRef;
 
@@ -117,12 +119,14 @@ export class BroadcastDetailComponent implements OnInit {
           }
           
           if (this.broadcast[0].jobStatus == 'Completed'){
+            this.showResultDetail =true;
             console.log('this.broadcast.Results' + this.broadcast[0].jobStatus);
             console.log('this.broadcast.Results' + this.broadcast[0].Results[0].Phone);
-            this.showResultDetail =true;
+            
           }else {
-            console.log('this.broadcast.Results' + this.broadcast[0].jobStatus);
             this.showResultDetail = false;
+            console.log('this.broadcast.Results' + this.broadcast[0].jobStatus);
+            
           }
 
         }
@@ -260,8 +264,17 @@ export class BroadcastDetailComponent implements OnInit {
           if (this.wechat == 'wechat'){ 
 
             console.log("new wechat image broadcast flow");   
+
+                if (this.fileExtention =='pdf'){
+
+                  // this.newBroadcast.imagefile = this.pdfSrc;
+                  var base64WechatImage = ((this.pdfSrc).split(",")[1]);
+                } else {
+                  var base64WechatImage = ((this.url).split(",")[1]);
+                }
+
                         
-            var base64WechatImage = ((this.url).split(",")[1]);
+            // var base64WechatImage = ((this.url).split(",")[1]);
             var jsonWechatImage = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", imagefilename:this.selectedImage.name, imagefileBase64:base64WechatImage, contactListJson:{contactList: this.addUserToList}}
              console.log("wechat image:" +base64WechatImage);
 
@@ -314,7 +327,16 @@ export class BroadcastDetailComponent implements OnInit {
           if (this.line == 'line'){ 
 
             console.log("new Line image broadcast flow");
-            var base64LineImage = ((this.url).split(",")[1]);            
+            if (this.fileExtention =='pdf'){
+
+              // this.newBroadcast.imagefile = this.pdfSrc;
+              var base64LineImage = ((this.pdfSrc).split(",")[1]);
+            } else {
+
+              var base64LineImage = ((this.url).split(",")[1]);
+            }            
+
+            // var base64LineImage = ((this.url).split(",")[1]);            
             var jsonLineImage = {sessionID:"Aptc123456", message:this.newBroadcast.message , prependContactName:"Y", imagefilename:this.selectedImage.name, imagefileBase64:base64LineImage, contactListJson:{contactList: this.addUserToList}}
 
             //write to DB
@@ -868,6 +890,8 @@ export class BroadcastDetailComponent implements OnInit {
     this.showGroupName = true;
     this.selectUser = false;
     this.showUsers = false;
+    this.selectNonWhatsappFile = false;
+    this.selectWhatsappFile = true;     
 //     this.showSenderPhoneNumber = true;
 //     this.basic = null;
 //     this.flash = null;
@@ -888,6 +912,8 @@ export class BroadcastDetailComponent implements OnInit {
     this.showGroupName = false;
     this.selectUser = true;
     this.showUsers = false;
+    this.selectNonWhatsappFile = true;
+    this.selectWhatsappFile = false;    
 //     this.showSenderPhoneNumber = true;
 //     this.basic = null;
 //     this.flash = null;
@@ -908,6 +934,8 @@ export class BroadcastDetailComponent implements OnInit {
     this.showGroupName = false;
     this.selectUser = true;
     this.showUsers = false;
+    this.selectNonWhatsappFile = true;
+    this.selectWhatsappFile = false;
 //     this.showSenderPhoneNumber = true;
 //     this.basic = null;
 //     this.flash = null;

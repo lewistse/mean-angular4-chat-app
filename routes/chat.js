@@ -1540,13 +1540,13 @@ router.post('/contact', auth, function(req, res, next) {
 
 /* UPDATE contact */
 // router.put('/contact/:id', function(req, res, next) {
-router.put('/contact/:id', auth, function(req, res, next) {
+router.put('/contact/:userId', auth, function(req, res, next) {
   if (!req.payload._id) {
     res.status(401).json({
       "message" : "UnauthorizedError:"
     });
   } else {  
-    Contact.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+    Contact.findOneAndUpdate({id:req.params.userId}, req.body, function (err, post) {
       if (err) return next(err);
       res.json(post);
     });
@@ -1555,13 +1555,13 @@ router.put('/contact/:id', auth, function(req, res, next) {
 
 /* DELETE conact */
 // router.delete('/contact/:id', function(req, res, next) {
-router.delete('/contact/:id', auth, function(req, res, next) {
+router.delete('/contact/:userId', auth, function(req, res, next) {
   if (!req.payload._id) {
     res.status(401).json({
       "message" : "UnauthorizedError:"
     });
   } else {  
-    Contact.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+    Contact.findOneAndRemove({id:req.params.userId}, req.body, function (err, post) {
       if (err) return next(err);
       res.json(post);
     });

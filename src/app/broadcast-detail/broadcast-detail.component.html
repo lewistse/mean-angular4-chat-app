@@ -169,8 +169,10 @@
  													</div>
  												</div>
 	                      <div class="form-group">
-							            <label class="col-sm-4 control-label">Select Image or PDF	       
+							            <label class="col-sm-4 control-label" *ngIf ="selectWhatsappFile">Select Image or PDF	     
 	                        </label>
+							            <label class="col-sm-4 control-label" *ngIf ="selectNonWhatsappFile">Select Image ONLY	     
+	                        </label>	                        
               						<button type="button" class="btn btn-default btn-sm " (click)="fileInput.click()">Browse</button>
               						<button id="button" type="button" class="btn btn-default btn-sm " (click)="clearSelectedFile()">Clear</button>
               						<input style = "display: none" type="file" class="form-control-static" (change)="onImageFileSelected($event)" placeholder="Optional" #fileInput name="filename" >
